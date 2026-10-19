@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>捷而思・現在搞什麼鬼？！｜萬聖節限定篇</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700&family=IBM+Plex+Mono:wght@500&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--void-ink:#0b0e14;--grave-slate:#1c222d;--pumpkin:#ff7a1a;--spectral:#7dffb2;--venom:#9b5de5;--blood:#e63946;--bone:#f1ead8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--cursor-ghost:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28'><path d='M4 26V12a10 10 0 0 1 20 0v14l-4-3-3 3-3-3-3 3-3-3z' fill='%237dffb2' opacity='.9'/><circle cx='10' cy='12' r='2'/><circle cx='18' cy='12' r='2'/></svg>") 14 14,auto}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--void-ink);color:var(--bone);font:16px/1.7 'Noto Sans TC',sans-serif;cursor:var(--cursor-ghost);min-height:100vh;overflow-x:hidden}
+button,input{cursor:var(--cursor-ghost);font:inherit}
+.fog{position:fixed;inset:0;pointer-events:none;background:radial-gradient(60% 40% at 20% 30%,#7dffb21a,transparent),radial-gradient(50% 40% at 80% 70%,#9b5de522,transparent);animation:fog 18s ease-in-out infinite alternate}
+@keyframes fog{to{transform:translateX(6%) scale(1.15)}}
+.ember{position:fixed;bottom:-10px;width:5px;height:5px;border-radius:50%;background:var(--pumpkin);box-shadow:0 0 8px var(--pumpkin);animation:up 7s linear infinite;pointer-events:none}
+@keyframes up{to{transform:translateY(-105vh);opacity:0}}
+#app,#adm,#lb{position:relative;max-width:760px;margin:0 auto;padding:16px}
+h1,h2,h3{font-family:Fraunces,'Noto Sans TC',serif;color:var(--pumpkin);margin:.3em 0}
+h1{font-size:clamp(1.5rem,6vw,2.4rem);text-align:center}
+.card{background:var(--grave-slate);border:1px solid #ffffff18;border-radius:14px;padding:18px;margin:12px 0}
+#app.enter .card{animation:fade .5s}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}}
+.btn{background:var(--pumpkin);color:#111;border:0;border-radius:10px;padding:10px 18px;font-weight:700;margin:4px;min-height:44px}
+.btn.alt{background:var(--venom);color:#fff}.btn.red{background:var(--blood);color:#fff}.btn.sm{padding:4px 10px;min-height:32px;font-size:.85rem}
+.btn:disabled{opacity:.35}
+input{width:100%;padding:12px;border-radius:10px;border:1px solid #ffffff30;background:#0b0e14;color:var(--bone);margin:6px 0}
+.mono{font-family:'IBM Plex Mono',monospace}
+.chip{display:inline-block;padding:8px 14px;margin:4px;border-radius:20px;background:var(--venom);color:#fff;font-weight:700;min-height:40px}
+.slot{display:inline-block;min-width:76px;min-height:42px;border:2px dashed var(--spectral);border-radius:10px;margin:4px;padding:6px 10px;text-align:center;color:var(--spectral)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.rune{display:inline-block;width:38px;height:38px;line-height:36px;text-align:center;border:2px solid #ffffff30;border-radius:50%;margin-right:6px}
+.rune.on{border-color:var(--pumpkin);color:var(--pumpkin)}.rune.ok{border-color:var(--spectral);color:var(--spectral)}
+.timer{font-family:'IBM Plex Mono',monospace;font-size:1.2rem;color:var(--spectral);border:2px solid var(--spectral);border-radius:30px;padding:2px 14px}
+.timer.pause{color:var(--pumpkin);border-color:var(--pumpkin)}
+.timer.low{color:var(--blood);border-color:var(--blood);animation:blink 1s infinite}@keyframes blink{50%{opacity:.35}}
+.saved{font-size:.78rem;color:var(--spectral);opacity:.8;text-align:center}
+.pegs{display:flex;gap:6px;padding:6px 0 4px}
+.peg{--rod:#8b93a3;position:relative;flex:1;min-width:0;height:230px;border-radius:10px;display:flex;flex-direction:column-reverse;align-items:center;padding:0 2px 16px;gap:4px;-webkit-tap-highlight-color:transparent}
+.peg::before{content:"";position:absolute;left:50%;transform:translateX(-50%);top:6px;bottom:10px;width:12px;border-radius:6px 6px 0 0;background:linear-gradient(90deg,#4b5363,var(--rod) 45%,#4b5363)}
+.peg::after{content:"";position:absolute;left:4%;right:4%;bottom:4px;height:12px;border-radius:6px;background:linear-gradient(#6b7385,#3a4150)}
+.peg.goal{--rod:var(--spectral)}.peg.goal::after{background:linear-gradient(var(--spectral),#2f9a63)}
+.peg.sel{--rod:var(--pumpkin);background:#ff7a1a14}.peg.sel::after{background:linear-gradient(var(--pumpkin),#b3500c)}
+.peg.sel .disk:last-child{box-shadow:0 0 0 2px var(--pumpkin),0 0 12px var(--pumpkin)}
+.disk{position:relative;z-index:1;height:36px;border-radius:18px;background:var(--venom);display:flex;align-items:center;justify-content:center;font-size:1.3rem;box-shadow:0 2px 4px #0008}
+.slider{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-width:380px;margin:12px auto;aspect-ratio:1}
+.tile{border:0;border-radius:8px;color:#fff;font-weight:700;font-size:clamp(1rem,5vw,1.5rem);transition:.25s}.tile.blank{visibility:hidden}
+table{width:100%;border-collapse:collapse;font-size:.9rem}td,th{padding:6px;border-bottom:1px solid #ffffff18;text-align:left}
+.gold{color:#ffd700}.silver{color:#c0c0c0}.bronze{color:#cd7f32}
+.err{color:var(--blood)}
+.boardwrap{position:relative}
+.shieldmsg{display:none;position:absolute;inset:0;z-index:3;align-items:center;justify-content:center;flex-direction:column;text-align:center;border:2px dashed var(--pumpkin);border-radius:12px;background:var(--grave-slate);color:var(--pumpkin);font-weight:700}
+body.shield .boardwrap .slider{visibility:hidden}
+body.shield .shieldmsg{display:flex}
+body.shield .hintbtn{pointer-events:none;opacity:.35}
+.decl{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;background:#000c}
+.decl>div{width:100%;max-width:420px;background:var(--grave-slate);border:2px solid var(--pumpkin);border-radius:16px;padding:22px 18px;text-align:center;box-shadow:0 0 30px #ff7a1a40}
+.decl h3{margin:0 0 6px}.decl .q{font-size:1.35rem;font-weight:700;color:var(--bone);margin:14px 0 6px;line-height:1.5}.decl small{color:#aaa}
+/* ---- 通關開門動畫 ---- */
+.gs-scene{position:relative;height:340px;overflow:hidden;border-radius:12px;background:radial-gradient(70% 60% at 50% 100%,#2a3347,transparent),linear-gradient(#070a10,#1c222d)}
+.gs-scene i{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;opacity:.7;animation:blink 3s infinite}
+.gs-moon{position:absolute;right:22px;top:14px;font-size:34px;opacity:.9}
+.gs-ground{position:absolute;left:0;right:0;bottom:0;height:22px;background:#10141b;border-top:2px solid #2a3040}
+.gs-frame{position:absolute;left:50%;bottom:22px;width:220px;height:270px;margin-left:-110px;border:10px solid #454b5c;border-bottom:0;border-radius:110px 110px 0 0;overflow:hidden;perspective:800px;background:#05070b;box-shadow:0 0 0 3px #1b1f29}
+.gs-glow{position:absolute;inset:0;background:radial-gradient(circle at 50% 72%,#fffbe0,#ffd36b 32%,#ff9a3c 68%,#7a2f00);opacity:0;animation:gsfade 2s 4s forwards}
+.gs-rays{position:absolute;left:-60%;right:-60%;top:-20%;bottom:-40%;background:repeating-conic-gradient(from 0deg at 50% 62%,#ffffff55 0 6deg,transparent 6deg 18deg);opacity:0;animation:gsfade 2s 4.4s forwards,gsspin 24s linear infinite}
+.gs-prize{position:absolute;left:0;right:0;bottom:16px;text-align:center;font-size:44px;opacity:0;animation:gsfade 1s 5.6s forwards;filter:drop-shadow(0 0 10px #fff)}
+.gs-door{position:absolute;top:0;width:50%;height:100%;background:linear-gradient(#262a33,#262a33) 0 24%/100% 10px no-repeat,linear-gradient(#262a33,#262a33) 0 72%/100% 10px no-repeat,repeating-linear-gradient(90deg,#6a4426 0 17px,#4a2e1a 17px 20px);box-shadow:inset 0 0 22px #000b}
+.gs-door::after{content:"";position:absolute;top:52%;width:12px;height:12px;border:3px solid #c9a227;border-radius:50%}
+.gs-door.l{left:0;transform-origin:0 50%;animation:gsdl 2.6s 4s cubic-bezier(.6,0,.3,1) forwards}
+.gs-door.l::after{right:8px}
+.gs-door.r{right:0;transform-origin:100% 50%;animation:gsdr 2.6s 4s cubic-bezier(.6,0,.3,1) forwards}
+.gs-door.r::after{left:8px}
+@keyframes gsdl{to{transform:rotateY(-108deg)}}@keyframes gsdr{to{transform:rotateY(108deg)}}
+.gs-lock{position:absolute;left:50%;top:166px;width:34px;height:34px;margin-left:-17px;font-size:30px;line-height:34px;text-align:center;z-index:5;animation:gsout .4s 4s forwards}
+.gs-lock span{position:absolute;inset:0}
+.gs-lock .c{animation:gsout .15s 3.6s forwards}
+.gs-lock .o{opacity:0;animation:gsfade .15s 3.6s forwards}
+.gs-flash{position:absolute;left:50%;top:183px;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;background:radial-gradient(#fff,var(--spectral) 40%,transparent 70%);opacity:0;z-index:6;animation:gsflash .9s 3.6s ease-out}
+@keyframes gsflash{0%{opacity:1;transform:scale(.3)}100%{opacity:0;transform:scale(7)}}
+.gs-key{position:absolute;left:50%;top:20px;margin-left:-24px;font-size:44px;line-height:48px;z-index:7;opacity:0;filter:drop-shadow(0 0 10px #ffd700) drop-shadow(0 0 22px #ffb300);animation:gskey 4.2s .3s ease-in-out forwards}
+@keyframes gskey{0%{top:20px;opacity:0;transform:scale(.2) rotate(-30deg)}12%{top:30px;opacity:1;transform:scale(1.6) rotate(0)}24%{top:40px;opacity:1;transform:scale(1.6) rotate(8deg)}36%{top:30px;opacity:1;transform:scale(1.6) rotate(-8deg)}62%{top:152px;opacity:1;transform:scale(1) rotate(0)}66%{top:152px;opacity:1;transform:scale(1) rotate(0)}80%{top:152px;opacity:1;transform:scale(1) rotate(90deg)}95%{top:152px;opacity:0;transform:scale(1) rotate(90deg)}100%{top:152px;opacity:0;transform:scale(1) rotate(90deg)}}
+.gs-p{position:absolute;left:50%;top:183px;font-size:22px;opacity:0;z-index:4;animation:gsburst 2.2s ease-out forwards}
+@keyframes gsburst{0%{opacity:0;transform:translate(0,0) scale(.4)}15%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(360deg) scale(1.1)}}
+.gs-caps{position:relative;height:58px;text-align:center;margin-top:10px}
+.gs-caps p{position:absolute;left:0;right:0;margin:0;opacity:0;font-weight:700;color:var(--spectral)}
+.gs-caps .a{animation:gscap 3.4s .2s forwards}.gs-caps .b{animation:gscap 3.3s 3.5s forwards}.gs-caps .c{color:var(--pumpkin);animation:gsfade .8s 6.8s forwards}
+@keyframes gscap{0%{opacity:0}10%{opacity:1}88%{opacity:1}100%{opacity:0}}
+@keyframes gsfade{to{opacity:1}}@keyframes gsout{to{opacity:0}}@keyframes gsspin{to{transform:rotate(360deg)}}
+.gs-next{visibility:hidden;opacity:0;animation:gsshow .6s 7.4s forwards}
+@keyframes gsshow{from{opacity:0;visibility:visible}to{opacity:1;visibility:visible}}
+@media(prefers-reduced-motion:reduce){.gs-scene *{animation-duration:.01s!important;animation-delay:0s!important}.gs-next{animation-delay:0s!important}}
+@media(max-width:480px){#app,#adm,#lb{padding:10px}.card{padding:14px}}
+</style></head><body>
+<div class="fog"></div><div id="embers"></div>
+<div id="app"></div><div id="lb"></div><div id="adm"></div>
+<script>
+const CONFIG={
+ ORG_NAME:"管理部",EVENT_START:null,EVENT_END:null, // 例："2026-10-31T09:00:00+08:00"
+ SCORE_URL:"https://script.google.com/macros/s/AKfycbxjscktWJ-pBHSPxQxTxfuG0LMiyd1RG7kh50u3pwUMACZLlAF_PEu-GIc4P_mhmsmn7A/exec", // 雲端排行榜：貼上 Google Apps Script 部署後的「網頁應用程式網址」（https://script.google.com/macros/s/.../exec）；留空則只用本機排行榜
+ TIME_BUDGET_MIN:30,PASSWORD_WORDS:["Trick","or","Treat"],
+ ADMIN_NAMES:["管理員","admin"],ADMIN_HASH:"9a219886bc04f8c00904b7ff450ad45c0c3914034e82d1ff7a3fe78c94826ed6", // 預設密碼 Boo!2026，請自行更換
+ GHOST_COUNTS:{w:3,b:5,g:1},
+ SHUFFLE_STEPS:30, // 第三關打亂步數：越小越簡單（原本 90）
+ HINT_MAX_USES:5,HINT_PENALTY_SEC:10,HINT_AUTO_STEPS:5};
+// ---- SHA-256 (pure JS) ----
+function sha256(str){const K=[],H0=[];let c=2,n=0;const fr=x=>((x-Math.floor(x))*4294967296)>>>0;
+ while(n<64){let pr=1;for(let i=2;i*i<=c;i++)if(c%i===0){pr=0;break}
+  if(pr){if(n<8)H0[n]=fr(Math.sqrt(c));K[n++]=fr(Math.cbrt(c))}c++}
+ const u=unescape(encodeURIComponent(str)),by=[];for(let i=0;i<u.length;i++)by.push(u.charCodeAt(i));
+ const bl=by.length*8;by.push(128);while(by.length%64!==56)by.push(0);
+ by.push(0,0,0,0,(bl>>>24)&255,(bl>>>16)&255,(bl>>>8)&255,bl&255);
+ const R=(x,k)=>(x>>>k)|(x<<(32-k));let hs=H0.slice();
+ for(let o=0;o<by.length;o+=64){const w=new Array(64);
+  for(let i=0;i<16;i++)w[i]=(by[o+i*4]<<24)|(by[o+i*4+1]<<16)|(by[o+i*4+2]<<8)|by[o+i*4+3];
+  for(let i=16;i<64;i++){const a=w[i-15],d=w[i-2];w[i]=(w[i-16]+(R(a,7)^R(a,18)^(a>>>3))+w[i-7]+(R(d,17)^R(d,19)^(d>>>10)))|0}
+  let [a,b,c3,d,e,f,g,h]=hs;
+  for(let i=0;i<64;i++){const t1=(h+(R(e,6)^R(e,11)^R(e,25))+((e&f)^(~e&g))+K[i]+w[i])|0,t2=((R(a,2)^R(a,13)^R(a,22))+((a&b)^(a&c3)^(b&c3)))|0;
+   h=g;g=f;f=e;e=(d+t1)|0;d=c3;c3=b;b=a;a=(t1+t2)|0}
+  hs=[a,b,c3,d,e,f,g,h].map((v,i)=>(hs[i]+v)|0)}
+ return hs.map(v=>(v>>>0).toString(16).padStart(8,"0")).join("")}
+window.sha256=sha256;
+// ---- storage ----
+const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
+const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let USERS=ld("hw_users",{}),REC=ld("hw_rec",[]),ME=ld("hw_me",null),P=null,ADMIN=false,view="login",tick=null;
+const $=id=>document.getElementById(id);
+const save=()=>{USERS[ME]=P;sv("hw_users",USERS);sv("hw_rec",REC)};
+const fmt=d=>{d=new Date(d);const z=n=>String(n).padStart(2,"0");return`${d.getFullYear()}/${z(d.getMonth()+1)}/${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}`};
+const mmss=s=>`${String(Math.floor(s/60)).padStart(2,"0")} 分 ${String(Math.floor(s%60)).padStart(2,"0")} 秒`;
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+for(let i=0;i<14;i++){const e=document.createElement("i");e.className="ember";e.style.left=Math.random()*100+"%";e.style.animationDelay=Math.random()*7+"s";e.style.animationDuration=5+Math.random()*5+"s";$("embers").appendChild(e)}
+// ---- puzzle data ----
+const FORMS=[["白 × 黑 − 灰",(w,b,g)=>w*b-g],["（白 + 黑 + 灰）× 2",(w,b,g)=>(w+b+g)*2],["黑的平方 − （白 × 灰）",(w,b,g)=>b*b-w*g],["（白 + 黑）× 灰 − 白",(w,b,g)=>(w+b)*g-w]];
+function newProgress(name){const{w,b,g}=CONFIG.GHOST_COUNTS,fi=Math.random()*FORMS.length|0,salt=Math.random().toString(36).slice(2);
+ let ord=[...Array(16).keys()],pos=15,trail=[15],prev=-1;
+ for(let i=0;i<CONFIG.SHUFFLE_STEPS;i++){const r=pos>>2,c=pos&3,n=[];if(r>0)n.push(pos-4);if(r<3)n.push(pos+4);if(c>0)n.push(pos-1);if(c<3)n.push(pos+1);
+  const ch=n.filter(x=>x!==prev),q=ch[Math.random()*ch.length|0];ord[pos]=ord[q];ord[q]=15;prev=pos;pos=q;
+  if(trail.length>1&&trail[trail.length-2]===q)trail.pop();else trail.push(q)}
+ return{name,lvl:0,el:0,start:null,end:null,fi,salt,ah:sha256(salt+FORMS[fi][1](w,b,g)),wrong:0,
+  pegs:[[4,3,2,1],[],[]],hm:0,hundo:[],ord,trail,hints:0,msg:""}}
+function inEvent(){const n=Date.now();if(CONFIG.EVENT_START&&n<+new Date(CONFIG.EVENT_START))return"活動尚未開啟 👻";if(CONFIG.EVENT_END&&n>+new Date(CONFIG.EVENT_END))return"活動已結束 🪦";return""}
+// ---- timer (foreground only) ----
+let last=Date.now(),paused=false,HB=false,hintTimer=null;
+function resetRun(){paused=false;HB=false;clearInterval(hintTimer);hintTimer=null;sel=-1}
+function startTick(){clearInterval(tick);last=Date.now();let sk=-1;tick=setInterval(()=>{const n=Date.now();let d=(n-last)/1000;last=n;
+ if(!P||view!=="puzzle"||document.hidden||paused)return;if(d>2)d=.25;P.el+=d;const s=Math.floor(P.el);if(s!==sk){sk=s;if(s%5==0)save()}paintTimer()},250)}
+// 返回頁面時重新對時、重啟計時器並解除卡住的狀態（瀏覽器可能在背景暫停或回收了計時器）
+function resync(){last=Date.now();if(!P||document.hidden)return;if(view==="puzzle"){startTick();if(HB&&!hintTimer){HB=false;render()}else paintTimer()}}
+document.addEventListener("visibilitychange",()=>{if(document.hidden){if(P)save()}else resync()});
+window.addEventListener("pageshow",resync);window.addEventListener("focus",resync);window.addEventListener("pagehide",()=>{if(P)save()});
+function paintTimer(){const t=$("tm");if(!t)return;const left=Math.max(0,CONFIG.TIME_BUDGET_MIN*60-P.el);t.textContent=(paused?"⏸ ":"")+`${String(Math.floor(left/60)).padStart(2,"0")}:${String(Math.floor(left%60)).padStart(2,"0")}`;t.className="timer"+(paused?" pause":left<300?" low":"");if(left<=0&&!P.timeout){P.timeout=1;save();render()}}
+// ---- render ----
+const SAVED='<div class="saved">💾 進度已自動儲存，重新整理也不會消失</div>';
+let pw=[],slots=[],chips=[],sel=-1;
+let shown="";
+function render(){const a=$("app"),changed=view!==shown;shown=view;
+ const paint=()=>{a.className=changed?"enter":"";a.innerHTML=({login:rLogin,brief:rBrief,puzzle:rPuzzle,gate:rGate,done:rDone})[view]();a.style.opacity=1;if(view==="puzzle"){paintTimer();applyLock()}rLB();rAdm();afterLoginFill()};
+ if(changed){a.style.opacity=0;setTimeout(paint,150)}else paint()}
+a=null;$("app").style.transition="opacity .2s";
+function rLogin(){const e=inEvent();if(!chips.length){chips=shuf(CONFIG.PASSWORD_WORDS.map((w,i)=>({w,i})));slots=[]}
+ return`<h1>👻 捷而思・現在搞什麼鬼？！</h1><p style="text-align:center;color:var(--spectral)">萬聖節限定篇・主辦：${CONFIG.ORG_NAME}</p>
+ <div class="card">${e?`<p class="err">${e}</p>`:""}<label>資安特派員姓名</label><input id="nm" placeholder="請輸入姓名" oninput="nmChg()" maxlength="20">
+ <div id="pwb" style="display:none"><label>管理員密碼</label><input id="ap" type="password"></div>
+ <p>通關密語：依序點擊排出正確順序</p><div>${CONFIG.PASSWORD_WORDS.map((_,i)=>`<span class="slot" onclick="unslot(${i})">${slots[i]!=null?chips.find(c=>c.i===slots[i]).w:"?"}</span>`).join("")}</div>
+ <div>${chips.filter(c=>!slots.includes(c.i)).map(c=>`<span class="chip" onclick="pick(${c.i})">${c.w}</span>`).join("")}</div>
+ <button class="btn" id="go" onclick="login()" ${slots.length===CONFIG.PASSWORD_WORDS.length&&slots.every((s,i)=>s===i)&&!e?"":"disabled"}>進入辦公室</button><div id="lerr" class="err"></div></div>`}
+function pick(i){slots.push(i);keepName();render()}function unslot(i){slots.splice(i);keepName();render()}
+let nmv="",apv="";function keepName(){const n=$("nm");if(n)nmv=n.value;const a=$("ap");if(a)apv=a.value}
+function nmChg(){nmv=$("nm").value.trim();$("pwb").style.display=CONFIG.ADMIN_NAMES.includes(nmv)?"block":"none"}
+function afterLoginFill(){const n=$("nm");if(n){n.value=nmv;const a=$("ap");if(a)a.value=apv;nmChg()}}
+
+function login(){const n=($("nm").value||"").trim();if(!n){$("lerr").textContent="請輸入姓名";return}
+ ADMIN=false;if(CONFIG.ADMIN_NAMES.includes(n)){if(sha256($("ap").value)!==CONFIG.ADMIN_HASH){$("lerr").textContent="管理員密碼錯誤";return}ADMIN=true}
+ apv="";enter(n)}
+function enter(n){ME=n;sv("hw_me",n);P=USERS[n]||newProgress(n);resetRun();delete P.busy;setTimeout(submitScore,800);if(P.pegs&&P.pegs.length!==3){P.pegs=[[4,3,2,1],[],[]];P.hm=0;P.hundo=[]}{const{w,b,g}=CONFIG.GHOST_COUNTS;P.ah=sha256(P.salt+FORMS[P.fi][1](w,b,g))}USERS[n]=P;save();view=P.end?(P.gp?"gate":"done"):(P.start?"puzzle":"brief");if(view==="puzzle")startTick();render()}
+function rBrief(){return`<div class="card"><h2>任務簡報</h2><p>夜色低垂，萬聖夜的辦公室成了無主之地。空氣中迴盪著詭譎的低語：『Trick or Treat...』</p><p>有群搗蛋鬼正在入侵，你已被指派為本次的資安特派員，必須在 <b>${CONFIG.TIME_BUDGET_MIN} 分鐘</b> 的倒數時限內，突破三關試煉化解這場危機。</p><p style="font-size:.85rem;color:#aaa">計時只在分頁位於前景時累計；第三關可隨時按「暫停計時」。</p><button class="btn" onclick="begin()">接受任務</button><button class="btn alt" onclick="logout()">登出</button></div>${SAVED}`}
+function begin(){P.start=Date.now();save();view="puzzle";startTick();render()}
+function logout(){resetRun();P=null;ME=null;ADMIN=false;sv("hw_me",null);view="login";chips=[];slots=[];nmv="";apv="";render()}
+const INTRO=["會計的帳冊被改得面目全非，零用金的數字全被竄改。你必須在暗處冷靜清點並推算四處游蕩的幽靈總額，修好第一本亂帳，才能拿到通往下一關的鑰匙。","好不容易理清帳目，轉頭卻看見下午茶的精神支柱「零食櫃」被惡靈封印了。你必須遵循「大不壓小」的古老法則，將四重魔塔（骷髏、南瓜、蝙蝠、幽靈）移往右側淨化陣，破除封鎖！","終於挺進試煉的終點，但幽靈佈下的最後幻象打亂了大家的理智。在倒數計時崩解之前，將亂序的 16 格心智碎片滑動歸位，準備給大魔王致命一擊！"];
+const TITLES=["幽靈會計的記帳時刻","零食櫃的封印","管理部的理智碎片修復術"];
+function rPuzzle(){if(P.timeout)return`<div class="card"><h2 class="err">⏰ 時間到</h2><p>理智已被幽靈吞噬……請洽${CONFIG.ORG_NAME}重置後再挑戰。</p><button class="btn alt" onclick="logout()">登出</button></div>`;
+ const L=P.lvl;return`<div class="top"><div>${[0,1,2].map(i=>`<span class="rune ${i<L?"ok":i==L?"on":""}">${i<L?"✓":["🧮","🏰","🧩"][i]}</span>`).join("")}</div><div class="timer" id="tm">--:--</div></div>
+ <div class="card"><h2>第${["一","二","三"][L]}關：${TITLES[L]}</h2><p>${INTRO[L]}</p>${[l1,l2,l3][L]()}<div class="err">${P.msg||""}</div></div>${SAVED}`}
+function l1(){const{w,b,g}=CONFIG.GHOST_COUNTS;return`<p>辦公室裡藏著 <b>白色、黑色、灰色</b> 幽靈（請實地清點）。</p><p class="mono" style="color:var(--spectral)">公式：${FORMS[P.fi][0]} = ?</p>${P.wrong>=2?`<p>💡 提示：先算括號、乘法與平方，再做加減。</p>`:""}<input id="ans" type="number" inputmode="numeric" placeholder="輸入計算結果"><button class="btn" onclick="ans1()">提交</button>`}
+function ans1(){const v=$("ans").value.trim();if(sha256(P.salt+v)===P.ah){P.lvl=1;P.msg="";save();render()}else{P.wrong++;P.msg="帳目不符，再算一次！";save();render()}}
+const DK={1:"👻",2:"🦇",3:"🎃",4:"💀"};
+function l2(){return`<p>步數：<b class="mono">${P.hm}</b>（最少 15 步）</p><div class="pegs">${P.pegs.map((p,i)=>`<div class="peg ${sel===i?"sel":""} ${i==P.pegs.length-1?"goal":""}" onclick="hp(${i})">${p.map(d=>`<div class="disk" style="width:${30+d*17}%">${DK[d]}</div>`).join("")}</div>`).join("")}</div><button class="btn alt" onclick="undo()" ${P.hundo.length?"":"disabled"}>↶ 上一步</button><button class="btn red sm" onclick="resetH()">重來</button>`}
+function hp(i){const p=P.pegs;if(sel<0){if(p[i].length)sel=i}else{if(sel!==i){const d=p[sel][p[sel].length-1],t=p[i][p[i].length-1];if(!t||d<t){p[i].push(p[sel].pop());P.hundo.push([sel,i]);P.hm++;P.msg=""}else P.msg="大不壓小！"}sel=-1}
+ if(p[p.length-1].length===4){P.lvl=2;P.msg="";sel=-1}save();render()}
+function undo(){const m=P.hundo.pop();if(m){P.pegs[m[0]].push(P.pegs[m[1]].pop());P.hm--;save();render()}}
+function resetH(){P.pegs=[[4,3,2,1],[],[]];P.hm=0;P.hundo=[];save();render()}
+function l3(){const left=CONFIG.HINT_MAX_USES-P.hints;
+ if(paused)return`<div style="text-align:center;border:2px dashed var(--pumpkin);border-radius:12px;padding:28px 12px;margin:12px 0"><h3>⏸ 已暫停</h3><p>計時已停止，盤面暫時隱藏。</p><button class="btn" onclick="togglePause()">▶ 繼續遊戲</button></div>`;
+ return`<div class="boardwrap"><div class="slider">${P.ord.map((v,i)=>`<button class="tile ${v===15?"blank":""}" style="background:hsl(${v*24},55%,${v%2?32:40}%)" onclick="mv(${i})">${v===15?"":["🎃","👻","🦇","💀","🕷️","🕸️","🧙","🧛","🍬","🕯️","🦉","⚰️","🧟","🌙","🔮"][v]+"<br><small>"+(v+1)+"</small>"}</button>`).join("")}</div><div class="shieldmsg">🛡 盤面暫時隱藏<small style="font-weight:400;margin-top:6px">先動動腦想想</small></div></div>
+ <div style="text-align:center"><button class="btn alt" onclick="togglePause()" ${HB?"disabled":""}>⏸ 暫停計時</button><button class="btn alt hintbtn" onclick="askHint()" ${left<=0||HB?"disabled":""}>💡 使用提示（剩 ${left} 次，−${CONFIG.HINT_PENALTY_SEC} 秒）</button></div>`}
+// 防外流（輕量版）：偵測到電腦截圖快捷鍵就把第三關盤面鎖住隱藏 10 秒（切換分頁也會隱藏）。無法偵測手機實體按鍵截圖、錄螢幕或翻拍
+const SHOT_LOCK_MS=10000;
+let shTimer=null,lockUntil=+(function(){try{return localStorage.getItem("hw_lock")}catch(e){return 0}})()||0;
+const shOK=()=>P&&view==="puzzle"&&P.lvl===2&&!paused;
+function shield(ms){if(!shOK())return;document.body.classList.add("shield");if(Date.now()<lockUntil)return;clearTimeout(shTimer);if(ms)shTimer=setTimeout(unshield,ms)}
+function unshield(force){if(!force&&Date.now()<lockUntil)return;lockUntil=0;try{localStorage.removeItem("hw_lock")}catch(e){}clearTimeout(shTimer);document.body.classList.remove("shield")}
+function stars(u){const n=(u&&u.shots)|0;return n?` <span class="gold" style="font-size:.85em;letter-spacing:1px">${n>10?"★×"+n:"★".repeat(n)}</span>`:""}
+function lockShot(){if(!shOK())return;if(Date.now()>=lockUntil){P.shots=(P.shots||0)+1;save()}lockUntil=Date.now()+SHOT_LOCK_MS;try{localStorage.setItem("hw_lock",String(lockUntil))}catch(e){}applyLock();noClip()}
+function applyLock(){const r=lockUntil-Date.now();if(r>0&&P&&view==="puzzle"&&P.lvl===2){document.body.classList.add("shield");clearTimeout(shTimer);shTimer=setTimeout(()=>unshield(true),r)}}
+const noClip=()=>{try{navigator.clipboard.writeText("").catch(()=>{})}catch(x){}};
+document.addEventListener("visibilitychange",()=>{document.hidden?shield(0):unshield()});
+// 「預先隱藏」：碰到任何可能用來截圖的按鍵就立刻隱藏，放開後恢復（搶在最後一個鍵按下、系統開始截圖之前）
+//  - 修飾鍵：Ctrl / Cmd(Win) / Shift / Alt 任何一個
+//  - 截圖相關鍵：PrintScreen、S、3、4、5、6
+// 只要按到截圖相關鍵（單按一個、或同時按，如 PrintScreen、Ctrl/Cmd+Shift+S、3/4/5/6），除了立刻隱藏，另外鎖定隱藏 SHOT_LOCK_MS 並記 ★
+// （單按修飾鍵 Ctrl/Cmd/Shift/Alt 只在按住期間隱藏，不鎖定、不記星）
+let comboOn=false;const touch=new Set();
+const modHeld=e=>e.ctrlKey||e.metaKey||e.shiftKey||e.altKey;
+const SHOTKEY=/^(PrintScreen|KeyS|(Digit|Numpad)[3456])$/;
+const isPrt=e=>e.key==="PrintScreen"||e.key==="Snapshot"||e.code==="PrintScreen";
+const isShotKey=e=>isPrt(e)||SHOTKEY.test(e.code);
+function refreshHide(e){if(modHeld(e)||touch.size){comboOn=true;shield(0)}else if(comboOn){comboOn=false;unshield()}}
+// 自我修復：若放開按鍵時沒收到事件（例如視窗失焦、Mac 按著 Cmd 時不送 keyup），滑鼠一動或切回視窗就檢查並恢復
+["mousemove","pointerdown","click"].forEach(t=>document.addEventListener(t,e=>{if(comboOn&&!modHeld(e)){touch.clear();comboOn=false;unshield()}}));
+window.addEventListener("focus",()=>{touch.clear();comboOn=false;unshield()});
+document.addEventListener("keydown",e=>{if(SHOTKEY.test(e.code)||isPrt(e))touch.add(e.code||e.key);refreshHide(e);if(!e.repeat&&isShotKey(e))lockShot()});
+document.addEventListener("keyup",e=>{touch.delete(e.code||e.key);if(!modHeld(e))touch.clear();refreshHide(e);if(isShotKey(e))lockShot()});
+// ---- 使用提示前的聲明 ----
+const DECL=["我會加油","我會好好運用我的大腦","我會思考它怎麼運作","我會用AI幫我處理","我會想辦法破解😏"];
+const shielded=()=>document.body.classList.contains("shield")||Date.now()<lockUntil;
+function closeDecl(){const m=$("declm");if(m)m.remove()}
+function askHint(){if(!P||view!=="puzzle"||P.lvl!==2||P.hints>=CONFIG.HINT_MAX_USES||HB||paused||shielded()||$("declm"))return;
+ const n=P.hints+1,t=DECL[Math.min(n,DECL.length)-1],m=document.createElement("div");m.id="declm";m.className="decl";
+ m.innerHTML=`<div><h3>📜 使用提示前，請先點擊</h3><small>第 ${n} / ${CONFIG.HINT_MAX_USES} 次提示・扣 ${CONFIG.HINT_PENALTY_SEC} 秒</small><div class="q">「${t}」</div><button class="btn" onclick="confirmHint()">確定</button><button class="btn alt" onclick="closeDecl()">取消</button></div>`;
+ document.body.appendChild(m)}
+function confirmHint(){closeDecl();hint()}
+function togglePause(){if(HB)return;paused=!paused;last=Date.now();save();render()}
+function move(i){const b=P.ord.indexOf(15),r=b>>2,c=b&3,ir=i>>2,ic=i&3;if(Math.abs(r-ir)+Math.abs(c-ic)!==1)return false;
+ P.ord[b]=P.ord[i];P.ord[i]=15;const t=P.trail;if(t.length>1&&t[t.length-2]===i)t.pop();else t.push(i);return true}
+function chk(){if(P.ord.every((v,i)=>v===i)){P.lvl=3;P.end=Date.now();P.gp=1;REC.push({name:ME,start:P.start,end:P.end,sec:Math.round(P.el)});view="gate";save();submitScore()}}
+function mv(i){if(HB||paused)return;if(move(i)){chk();save();render()}}
+function hint(){if(P.hints>=CONFIG.HINT_MAX_USES||HB||paused||shielded())return;P.hints++;P.el+=CONFIG.HINT_PENALTY_SEC;HB=true;let n=0;save();
+ hintTimer=setInterval(()=>{const tr=P.trail;const stop=()=>{clearInterval(hintTimer);hintTimer=null;HB=false};
+  if(n++>=CONFIG.HINT_AUTO_STEPS||tr.length<2){stop();save();render();return}
+  move(tr[tr.length-2]);chk();if(view==="gate")stop();save();render()},450)}
+// ---- 通關開門動畫 ----
+function rGate(){const E=["🎃","👻","🦇","🍬","🕯️","✨","💀","🕸️"];let ps="",st="";
+ for(let i=0;i<18;i++){const dx=(Math.random()*320-160)|0,dy=-((60+Math.random()*190)|0),dl=(4.6+Math.random()*.8).toFixed(2);ps+=`<span class="gs-p" style="--dx:${dx}px;--dy:${dy}px;animation-delay:${dl}s">${E[i%E.length]}</span>`}
+ for(let i=0;i<14;i++)st+=`<i style="left:${Math.random()*100|0}%;top:${Math.random()*45|0}%;animation-delay:${(Math.random()*3).toFixed(1)}s"></i>`;
+ return`<div class="card" style="padding:12px"><div class="gs-scene">${st}<div class="gs-moon">🌙</div><div class="gs-ground"></div>
+ <div class="gs-frame"><div class="gs-glow"></div><div class="gs-rays"></div><div class="gs-prize">🎁</div><div class="gs-door l"></div><div class="gs-door r"></div></div>
+ <div class="gs-lock"><span class="c">🔒</span><span class="o">🔓</span></div><div class="gs-flash"></div><div class="gs-key">🗝️</div>${ps}</div>
+ <div class="gs-caps"><p class="a">最後一塊心智碎片歸位，一把金色鑰匙從幻象中浮現……</p><p class="b">喀嚓——封印解除，大門緩緩開啟！</p><p class="c">光芒的盡頭，就是通往勝利的出口。</p></div>
+ <div style="text-align:center"><button class="btn gs-next" onclick="finishGate()">領取任務結果 ▶</button></div>
+ </div>`}
+function finishGate(){P.gp=0;save();view="done";render()}
+function rDone(){let rk;if(CONFIG.SCORE_URL){rk=CLOUD?CLOUD.findIndex(r=>r.name===ME)+1:0}else rk=REC.slice().sort((a,b)=>a.sec-b.sec).findIndex(r=>r.name===ME&&r.start===P.start)+1;
+ return`<div class="card"><h2>🎉 任務圓滿達成</h2><p>隨著最後一塊心智碎片歸位，刺耳的警報聲戛然而止。幻象如煙霧般消散，你成功擊退了幽靈駭客與大魔王，拯救了大家的理智與物資，辦公室重新恢復了光明與平靜。任務圓滿達成，最強資安特派員！</p>
+ <h3>【本次任務資安紀錄】</h3><p><b>${ME}</b>${stars(P)}</p><p class="mono">🕒 開始時間：${fmt(P.start)}<br>🏁 完成時間：${fmt(P.end)}<br>⏱️ 花費總時間：${mmss(P.el)}</p>${rk?`<p>目前排名：第 ${rk} 名</p>`:""}
+ <p>現在請憑通關畫面，前往「${CONFIG.ORG_NAME}」領取屬於你的萬聖節戰利品與獎勵吧！</p><button class="btn alt" onclick="view='gate';render()">🎬 重播開門動畫</button><button class="btn alt" onclick="logout()">登出</button></div>`}
+// ---- leaderboard ----
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
+// ---- 雲端排行榜（Google Apps Script）----
+let CLOUD=null,cloudErr="",cloudBusy=false;
+function fetchLB(){if(!CONFIG.SCORE_URL||cloudBusy)return;cloudBusy=true;
+ fetch(CONFIG.SCORE_URL+(CONFIG.SCORE_URL.includes("?")?"&":"?")+"t="+Date.now()).then(r=>r.json()).then(j=>{CLOUD=Array.isArray(j)?j:[];cloudErr=""}).catch(()=>{cloudErr="無法連線到雲端排行榜"}).finally(()=>{cloudBusy=false;rLB();if(view==="done")render()})}
+function submitScore(){if(!CONFIG.SCORE_URL||!P||!P.end||P.sent||ADMIN)return;
+ const body=JSON.stringify({id:P.name+"|"+P.start,name:P.name,sec:Math.round(P.el),shots:P.shots|0,start:P.start,end:P.end});
+ fetch(CONFIG.SCORE_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body}).then(()=>{P.sent=1;save();setTimeout(fetchLB,1500)}).catch(()=>{})}
+if(CONFIG.SCORE_URL){fetchLB();setInterval(()=>{if(!document.hidden)fetchLB()},30000)}
+function rLB(){let L,title;
+ if(CONFIG.SCORE_URL){title="🏆 排行榜（全公司）";L=(CLOUD||[]).slice(0,10)}
+ else{title="🏆 排行榜（本機）";const best={};REC.forEach(r=>{if(!best[r.name]||r.sec<best[r.name].sec)best[r.name]=r});L=Object.values(best).sort((a,b)=>a.sec-b.sec).slice(0,10)}
+ const empty=CONFIG.SCORE_URL&&CLOUD===null?(cloudErr?`<p class="err">${cloudErr}</p>`:"<p>載入中…</p>"):"<p>尚無通關紀錄</p>";
+ $("lb").innerHTML=`<div class="card"><h3>${title}${CONFIG.SCORE_URL?' <button class="btn sm alt" onclick="fetchLB()">🔄 更新</button>':""}</h3>${L.length?`<table>${L.map((r,i)=>`<tr class="${["gold","silver","bronze"][i]||""}"><td>${["👑冠軍","🥈亞軍","🥉季軍"][i]||i+1}</td><td>${esc(r.name)}${stars({shots:r.shots})}</td><td class="mono">${mmss(r.sec)}</td></tr>`).join("")}</table>`:empty}${cloudErr&&CLOUD?`<p class="err" style="font-size:.8rem">${cloudErr}</p>`:""}</div>`}
+// ---- admin ----
+function rAdm(){const a=$("adm");if(!ADMIN){a.innerHTML="";return}
+ const names=Object.keys(USERS);
+ a.innerHTML=`<div class="card" style="border-color:var(--venom)"><h3>🛠 測試後台</h3>
+ <p style="font-size:.85rem">新增測試帳號並以該帳號登入遊玩，確認流程正常；可跳關、重設、刪除試玩紀錄。</p>
+ <input id="tn" placeholder="測試帳號名稱"><button class="btn sm" onclick="addT()">建立並進入</button>
+ <div style="overflow-x:auto"><table><tr><th>帳號</th><th>關卡</th><th>耗時</th><th>操作</th></tr>${names.map(n=>{const u=USERS[n];return`<tr><td>${n}${stars(u)}</td><td>${u.end?"完成":u.start?"第"+(u.lvl+1)+"關":"未開始"}</td><td class="mono">${mmss(u.el)}</td><td>
+ <button class="btn sm" onclick="asUser('${n}')">進入</button><button class="btn sm alt" onclick="skip('${n}')">跳關</button><button class="btn sm alt" onclick="rst('${n}')">重設</button><button class="btn sm red" onclick="del('${n}')">刪除</button></td></tr>`}).join("")}</table></div>
+ <button class="btn red sm" onclick="delAll()">清除全部試玩紀錄與排行榜</button></div>`}
+function addT(){const n=$("tn").value.trim();if(!n)return;if(CONFIG.ADMIN_NAMES.includes(n))return;const was=ADMIN;enter(n);ADMIN=was;rAdm()}
+function asUser(n){const was=ADMIN;enter(n);ADMIN=was;rAdm()}
+function skip(n){const u=USERS[n];if(!u)return;if(!u.start)u.start=Date.now();if(u.lvl<2)u.lvl++;else if(!u.end){u.end=Date.now();REC.push({name:n,start:u.start,end:u.end,sec:Math.round(u.el)})}
+ sv("hw_users",USERS);sv("hw_rec",REC);if(ME===n){resetRun();P=u;view=u.end?"done":"puzzle";startTick()}render()}
+function rst(n){USERS[n]=newProgress(n);REC=REC.filter(r=>r.name!==n);sv("hw_users",USERS);sv("hw_rec",REC);if(ME===n){resetRun();P=USERS[n];view="brief"}render()}
+function del(n){delete USERS[n];REC=REC.filter(r=>r.name!==n);sv("hw_users",USERS);sv("hw_rec",REC);if(ME===n){resetRun();P=null;ME=null;view="login";chips=[]}render()}
+function delAll(){if(!confirm("確定清除所有本機紀錄？"))return;USERS={};REC=[];sv("hw_users",USERS);sv("hw_rec",REC);P=null;ME=null;ADMIN=false;view="login";chips=[];render()}
+render();
+</script></body></html>
