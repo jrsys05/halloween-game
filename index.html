@@ -98,20 +98,21 @@ body.shield .hintbtn{pointer-events:none;opacity:.35}
 <script>
 const CONFIG={
  ORG_NAME:"管理部",
- SCORE_URL:"https://script.google.com/macros/s/AKfycbxjscktWJ-pBHSPxQxTxfuG0LMiyd1RG7kh50u3pwUMACZLlAF_PEu-GIc4P_mhmsmn7A/exec", // 雲端排行榜：貼上 Google Apps Script 部署後的「網頁應用程式網址」（https://script.google.com/macros/s/.../exec）；留空則只用本機排行榜
+ LB_SHOW_STATS:true, // 排行榜是否在姓名下方顯示每關次數／步數與秒數、提示次數；不想公開就改成 false（試算表仍會完整記錄）。「提示次數」固定要等玩家通關第三關才看得到（由後端控制）
+ SCORE_URL:"https://script.google.com/macros/s/AKfycbxjscktWJ-pBHSPxQxTxfuG0LMiyd1RG7kh50u3pwUMACZLlAF_PEu-GIc4P_mhmsmn7A/exec", // 雲端排行榜：貼上 Google Apps Script 部署後的「網頁應用程式網址」（https://script.google.com/macros/s/.../exec）；登入與第一關都要靠它驗證，一定要填
  TIME_BUDGET_MIN:30,
  PASS_WORDS:["or","Treat","Trick"], // 通關密語要顯示的詞（順序打亂，正確順序、管理員帳號與密碼、活動時間、鬼魂數量都存在後端 Apps Script 的「指令碼屬性」）
  SHUFFLE_STEPS:30, // 第三關打亂步數：越小越簡單（原本 90）
- HINT_MAX_USES:5,HINT_PENALTY_SEC:10,HINT_AUTO_STEPS:3, // 每次提示自動走幾步
+ HINT_MAX_USES:5,HINT_PENALTY_SEC:20,HINT_AUTO_STEPS:4, // 每次提示自動走幾步
  HINT_MIN_MOVES:5}; // 每次使用提示前，必須自己先走幾步（不含來回走同一格）
 // ---- storage ----
 const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
 const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
-let USERS=ld("hw_users",{}),REC=ld("hw_rec",[]),ME=ld("hw_me",null),P=null,ADMIN=false,view="login",tick=null;
+let USERS=ld("hw_users",{}),ME=null,P=null,ADMIN=false,view="login",tick=null;
 const $=id=>document.getElementById(id);
-const save=()=>{USERS[ME]=P;sv("hw_users",USERS);sv("hw_rec",REC)};
-const fmt=d=>{d=new Date(d);const z=n=>String(n).padStart(2,"0");return`${d.getFullYear()}/${z(d.getMonth()+1)}/${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}`};
-const mmss=s=>`${String(Math.floor(s/60)).padStart(2,"0")} 分 ${String(Math.floor(s%60)).padStart(2,"0")} 秒`;
+const svU=()=>sv("hw_users",USERS),save=()=>{USERS[ME]=P;svU()};
+const jpost=b=>fetch(CONFIG.SCORE_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(b)}).then(r=>r.json());
+const p2=n=>String(n).padStart(2,"0"),fmt=d=>{d=new Date(d);return`${d.getFullYear()}/${p2(d.getMonth()+1)}/${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`},mmss=s=>`${p2(Math.floor(s/60))} 分 ${p2(Math.floor(s%60))} 秒`;
 const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 for(let i=0;i<14;i++){const e=document.createElement("i");e.className="ember";e.style.left=Math.random()*100+"%";e.style.animationDelay=Math.random()*7+"s";e.style.animationDuration=5+Math.random()*5+"s";$("embers").appendChild(e)}
 // ---- puzzle data ----
@@ -133,15 +134,15 @@ function startTick(){clearInterval(tick);last=Date.now();let sk=-1;tick=setInter
 function resync(){last=Date.now();if(!P||document.hidden)return;if(view==="puzzle"){startTick();if(HB&&!hintTimer){HB=false;render()}else paintTimer()}}
 document.addEventListener("visibilitychange",()=>{if(document.hidden){if(P)save()}else resync()});
 window.addEventListener("pageshow",resync);window.addEventListener("focus",resync);window.addEventListener("pagehide",()=>{if(P)save()});
-function paintTimer(){const t=$("tm");if(!t)return;const left=Math.max(0,CONFIG.TIME_BUDGET_MIN*60-P.el);t.textContent=(paused?"⏸ ":"")+`${String(Math.floor(left/60)).padStart(2,"0")}:${String(Math.floor(left%60)).padStart(2,"0")}`;t.className="timer"+(paused?" pause":left<300?" low":"");if(left<=0&&!P.timeout){P.timeout=1;save();render()}}
+function paintTimer(){const t=$("tm");if(!t)return;const left=Math.max(0,CONFIG.TIME_BUDGET_MIN*60-P.el);t.textContent=(paused?"⏸ ":"")+`${p2(Math.floor(left/60))}:${p2(Math.floor(left%60))}`;t.className="timer"+(paused?" pause":left<300?" low":"");if(left<=0&&!P.timeout){P.timeout=1;save();render()}}
 // ---- render ----
 const SAVED='<div class="saved">💾 進度已自動儲存，重新整理也不會消失</div>';
-let pw=[],slots=[],chips=[],sel=-1;
+let slots=[],chips=[],sel=-1;
 let shown="";
 function render(){const a=$("app"),changed=view!==shown;shown=view;
  const paint=()=>{a.className=changed?"enter":"";a.innerHTML=({login:rLogin,brief:rBrief,puzzle:rPuzzle,gate:rGate,done:rDone})[view]();a.style.opacity=1;if(view==="puzzle"){paintTimer();applyLock()}rLB();rAdm();afterLoginFill()};
  if(changed){a.style.opacity=0;setTimeout(paint,150)}else paint()}
-a=null;$("app").style.transition="opacity .2s";
+$("app").style.transition="opacity .2s";
 function rLogin(){const e=EVT;if(!chips.length){chips=shuf(CONFIG.PASS_WORDS.map((w,i)=>({w,i})));slots=[]}
  return`<h1>👻 捷而思・現在搞什麼鬼？！</h1><p style="text-align:center;color:var(--spectral)">萬聖節限定篇・主辦：${CONFIG.ORG_NAME}</p>
  <div class="card">${e?`<p class="err">${e}</p>`:""}<label>資安特派員姓名</label><input id="nm" placeholder="請輸入姓名" oninput="nmChg()" maxlength="20">
@@ -166,7 +167,7 @@ async function login(){if(authBusy)return;const n=($("nm").value||"").trim();if(
  if(!CONFIG.SCORE_URL){$("lerr").textContent="尚未連線到伺服器（請先設定 SCORE_URL）";return}
  const pw=$("ap")?$("ap").value:"",seq=slots.map(i=>CONFIG.PASS_WORDS[i]);
  authBusy=true;$("go").disabled=true;$("lerr").textContent="驗證中…";
- let j;try{const r=await fetch(CONFIG.SCORE_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"login",name:n,seq,pw})});j=await r.json()}
+ let j;try{j=await jpost({action:"login",name:n,seq,pw})}
  catch(e){authBusy=false;$("go").disabled=false;$("lerr").textContent="無法連線驗證，請稍後再試";return}
  authBusy=false;
  const fail=(m,fn)=>{keepName();if(fn)fn();render();$("lerr").textContent=m};
@@ -182,18 +183,18 @@ async function login(){if(authBusy)return;const n=($("nm").value||"").trim();if(
 // 點擊「進入辦公室」後先跳出遊戲聲明，按「我知道了」才真正進入
 function notice(go){if($("noticem"))return;const m=document.createElement("div");m.id="noticem";m.className="decl";
  m.innerHTML=`<div class="notice"><h3>📌 遊戲聲明與小小提醒</h3>
- <p><b>※ 遊戲聲明：</b><br>本遊戲純屬娛樂，所有情節及結果均為虛構，不應作為現實決策之依據，亦不構成任何承諾或保證，請輕鬆遊玩即可！</p>
- <p><b>※ 關於開發者：</b><br>本遊戲是個人小作品，並非專業開發，若有不足之處，還請多多包涵。歡迎大家不吝賜教、回饋 Bug 或提出建議，但也請手下留情，別刻意破解漏洞或破壞遊戲運作啦XD</p>
- <p><b>※ 關於AI與思考：</b><br>歡迎使用 AI 協助破關，但也別忘了保持自己的觀察力與判斷力，留意日常生活中的細節與變化。善用AI，而不是依賴AI，保持判斷力，持續成長！</p>
- <p><b>※ 安全提醒：</b><br>請勿輸入或分享密碼、身分證字號、金融資料等敏感資訊，也請勿未經授權修改或破壞遊戲資料。</p>
+ <p><b>※ 遊戲聲明：</b><br>本遊戲純屬娛樂，所有情節均為虛構，請輕鬆遊玩即可！</p>
+ <p><b>※ 關於開發者：</b><br>本遊戲並非專業開發，若有不足之處，還請多多包涵。歡迎不吝賜教、提出回饋或建議，但也請手下留情，別刻意破解漏洞或破壞遊戲運作啦XD</p>
+ <p><b>※ 關於AI與思考：</b><br>歡迎使用AI協助破關，但還是希望要保留獨立思考和判斷能力！</p>
+ <p><b>※ 安全提醒：</b><br>請勿輸入身分證字號、金融資料等敏感資訊，也請勿未經授權修改或破壞遊戲資料。</p>
  <p style="text-align:center">🎃 感謝大家的遊玩與支持，祝大家萬聖節快樂！👻</p>
  <div class="acts"><button class="btn" id="noticeok">我知道了，進入辦公室</button><button class="btn alt" id="noticeno">返回</button></div></div>`;
  document.body.appendChild(m);
  $("noticeok").onclick=()=>{m.remove();go()};$("noticeno").onclick=()=>m.remove()}
-function enter(n){ME=n;sv("hw_me",n);P=USERS[n]||newProgress(n);resetRun();delete P.busy;setTimeout(submitScore,800);if(P.pegs&&P.pegs.length!==3){P.pegs=[[4,3,2,1],[],[]];P.hm=0;P.hundo=[]}USERS[n]=P;save();view=P.end?(P.gp?"gate":"done"):(P.start?"puzzle":"brief");if(view==="puzzle")startTick();render()}
+function enter(n){ME=n;P=USERS[n]||newProgress(n);resetRun();setTimeout(submitScore,800);setTimeout(fetchLB,900);USERS[n]=P;save();view=P.end?(P.gp?"gate":"done"):(P.start?"puzzle":"brief");if(view==="puzzle")startTick();render()}
 function rBrief(){return`<div class="card"><h2>任務簡報</h2><p>夜色低垂，萬聖夜的辦公室成了無主之地。空氣中迴盪著詭譎的低語：『Trick or Treat...』</p><p>有群搗蛋鬼正在入侵，你已被指派為本次的資安特派員，必須在 <b>${CONFIG.TIME_BUDGET_MIN} 分鐘</b> 的倒數時限內，突破三關試煉化解這場危機。</p><p style="font-size:.85rem;color:#aaa">計時只在分頁位於前景時累計；第三關可隨時按「暫停計時」。</p><button class="btn" onclick="begin()">接受任務</button><button class="btn alt" onclick="logout()">登出</button></div>${SAVED}`}
 function begin(){P.start=Date.now();save();view="puzzle";startTick();render()}
-function logout(){resetRun();P=null;ME=null;ADMIN=false;sv("hw_me",null);view="login";chips=[];slots=[];nmv="";apv="";render()}
+function logout(){resetRun();P=null;ME=null;ADMIN=false;view="login";chips=[];slots=[];nmv="";apv="";CLOUD=null;FULL=false;render();fetchLB()}
 const INTRO=["會計的帳冊被改得面目全非，零用金的數字全被竄改。你必須在暗處冷靜清點並推算四處游蕩的幽靈總額，修好第一本亂帳，才能拿到通往下一關的鑰匙。","好不容易理清帳目，轉頭卻看見下午茶的精神支柱「零食櫃」被惡靈封印了。你必須遵循「大不壓小」的古老法則，將四重魔塔（骷髏、南瓜、蝙蝠、幽靈）移往右側淨化陣，破除封鎖！","終於挺進試煉的終點，但幽靈佈下的最後幻象打亂了大家的理智。在倒數計時崩解之前，將亂序的 16 格心智碎片滑動歸位，準備給大魔王致命一擊！"];
 const TITLES=["幽靈會計的記帳時刻","零食櫃的封印","管理部的理智碎片修復術"];
 function rPuzzle(){if(P.timeout)return`<div class="card"><h2 class="err">⏰ 時間到</h2><p>理智已被幽靈吞噬……請洽${CONFIG.ORG_NAME}重置後再挑戰。</p><button class="btn alt" onclick="logout()">登出</button></div>`;
@@ -206,17 +207,17 @@ async function ans1(){if(ansBusy)return;const p=P,v=$("ans").value.trim();
  if(v===""||isNaN(Number(v))){p.msg="請輸入數字答案";render();return}
  if(!CONFIG.SCORE_URL){p.msg="尚未連線到驗證伺服器（請先設定 SCORE_URL）";render();return}
  ansBusy=true;const bt=document.querySelector("#ans+button");if(bt){bt.disabled=true;bt.textContent="驗證中…"}
- let j;try{const r=await fetch(CONFIG.SCORE_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"check1",name:p.name,fi:p.fi,ans:v})});j=await r.json()}
+ let j;try{j=await jpost({action:"check1",name:p.name,fi:p.fi,ans:v})}
  catch(e){ansBusy=false;if(P!==p)return;p.msg="無法連線驗證，請檢查網路後再試一次";render();return}
  ansBusy=false;if(P!==p)return;
- if(j&&j.ok){p.lvl=1;p.msg="";save();render()}
+ if(j&&j.ok){p.s1=(p.wrong|0)+1;p.t1=Math.round(p.el);p.lvl=1;p.msg="";save();render()}
  else if(j&&j.locked){p.msg="嘗試次數過多，請 10 分鐘後再試";render()}
  else if(j&&j.error){p.msg="驗證伺服器尚未設定完成，請通知主辦單位";render()}
  else{p.wrong++;p.msg="帳目不符，再算一次！";save();render()}}
 const DK={1:"👻",2:"🦇",3:"🎃",4:"💀"};
 function l2(){return`<p>步數：<b class="mono">${P.hm}</b>（最少 15 步）</p><div class="pegs">${P.pegs.map((p,i)=>`<div class="peg ${sel===i?"sel":""} ${i==P.pegs.length-1?"goal":""}" onclick="hp(${i})">${p.map(d=>`<div class="disk" style="width:${30+d*17}%">${DK[d]}</div>`).join("")}</div>`).join("")}</div><button class="btn alt" onclick="undo()" ${P.hundo.length?"":"disabled"}>↶ 上一步</button><button class="btn red sm" onclick="resetH()">重來</button>`}
 function hp(i){const p=P.pegs;if(sel<0){if(p[i].length)sel=i}else{if(sel!==i){const d=p[sel][p[sel].length-1],t=p[i][p[i].length-1];if(!t||d<t){p[i].push(p[sel].pop());P.hundo.push([sel,i]);P.hm++;P.msg=""}else P.msg="大不壓小！"}sel=-1}
- if(p[p.length-1].length===4){P.lvl=2;P.msg="";sel=-1}save();render()}
+ if(p[p.length-1].length===4){P.s2=P.hm;P.t2=Math.round(P.el);P.lvl=2;P.msg="";sel=-1}save();render()}
 function undo(){const m=P.hundo.pop();if(m){P.pegs[m[0]].push(P.pegs[m[1]].pop());P.hm--;save();render()}}
 function resetH(){P.pegs=[[4,3,2,1],[],[]];P.hm=0;P.hundo=[];save();render()}
 function l3(){const left=CONFIG.HINT_MAX_USES-P.hints;
@@ -232,13 +233,16 @@ function unshield(force){if(!force&&Date.now()<lockUntil)return;lockUntil=0;try{
 function stars(u){const n=(u&&u.shots)|0;return n?` <span class="gold" style="font-size:.85em;letter-spacing:1px">${n>10?"★×"+n:"★".repeat(n)}</span>`:""}
 function lockShot(){if(!shOK())return;if(Date.now()>=lockUntil){P.shots=(P.shots||0)+1;save()}lockUntil=Date.now()+SHOT_LOCK_MS;try{localStorage.setItem("hw_lock",String(lockUntil))}catch(e){}applyLock();noClip()}
 function applyLock(){const r=lockUntil-Date.now();if(r>0&&P&&view==="puzzle"&&P.lvl===2){document.body.classList.add("shield");clearTimeout(shTimer);shTimer=setTimeout(()=>unshield(true),r)}}
-const noClip=()=>{try{navigator.clipboard.writeText("").catch(()=>{})}catch(x){}};
+// PrintScreen 會把整個畫面（含盤面）放進剪貼簿。偵測到後立刻用一個空白字元蓋掉，並在 0.01 秒後再蓋一次
+function fbClip(){try{const t=document.createElement("textarea");t.value=" ";t.style.cssText="position:fixed;left:-999px;top:0;opacity:0";document.body.appendChild(t);t.select();document.execCommand("copy");t.remove()}catch(x){}}
+const clipClear=()=>{try{navigator.clipboard.writeText(" ").catch(fbClip)}catch(x){fbClip()}};
+const noClip=()=>{clipClear();[150,600,1500].forEach(ms=>setTimeout(clipClear,ms))};
 document.addEventListener("visibilitychange",()=>{document.hidden?shield(0):unshield()});
 // 「預先隱藏」：碰到任何可能用來截圖的按鍵就立刻隱藏，放開後恢復（搶在最後一個鍵按下、系統開始截圖之前）
-//  - 修飾鍵：Ctrl / Cmd(Win) / Shift / Alt 任何一個
+//  - 修飾鍵：Ctrl / Cmd(Win) / Shift / Alt /PrtSc任何一個
 //  - 截圖相關鍵：PrintScreen、S、3、4、5、6
 // 只要按到截圖相關鍵（單按一個、或同時按，如 PrintScreen、Ctrl/Cmd+Shift+S、3/4/5/6），除了立刻隱藏，另外鎖定隱藏 SHOT_LOCK_MS 並記 ★
-// （單按修飾鍵 Ctrl/Cmd/Shift/Alt 只在按住期間隱藏，不鎖定、不記星）
+// （單按修飾鍵 Ctrl/Cmd/Shift/Alt/PrtSc 只在按住期間隱藏，不鎖定、要記星）
 let comboOn=false;const touch=new Set();
 const modHeld=e=>e.ctrlKey||e.metaKey||e.shiftKey||e.altKey;
 const SHOTKEY=/^(PrintScreen|KeyS|(Digit|Numpad)[3456])$/;
@@ -262,14 +266,24 @@ function confirmHint(){closeDecl();hint()}
 function togglePause(){if(HB)return;paused=!paused;last=Date.now();save();render()}
 function move(i){const b=P.ord.indexOf(15),r=b>>2,c=b&3,ir=i>>2,ic=i&3;if(Math.abs(r-ir)+Math.abs(c-ic)!==1)return false;
  P.ord[b]=P.ord[i];P.ord[i]=15;const t=P.trail;if(t.length>1&&t[t.length-2]===i)t.pop();else t.push(i);return true}
-function chk(){if(P.ord.every((v,i)=>v===i)){P.lvl=3;P.end=Date.now();P.gp=1;REC.push({name:ME,start:P.start,end:P.end,sec:Math.round(P.el)});view="gate";save();submitScore()}}
+function chk(){if(P.ord.every((v,i)=>v===i)){P.lvl=3;P.end=Date.now();P.gp=1;view="gate";save();submitScore()}}
+// 第一關：提交次數、花費秒數；第二關：步數、花費秒數（t1／t2 是通過第一／二關當下的累計秒數）
+// 第三關：步數＝自己動滑塊的次數（提示自動走的不算）、秒數含提示扣的時間；h＝使用提示次數
+const lvlStats=u=>u.t1!=null&&u.t2!=null?{s1:u.s1,d1:u.t1,s2:u.s2,d2:u.t2-u.t1,s3:u.m3|0,d3:Math.max(0,Math.round(u.el)-u.t2),h:u.hints|0}:{};
+const m_s=s=>Math.floor(s/60)+":"+p2(Math.round(s)%60);
+const statsHtml=u=>{const t=lvlStats(u);return t.s1!=null?`<p class="mono">① 第一關：${t.s1} 次提交・${mmss(t.d1)}<br>② 第二關：${t.s2} 步・${mmss(t.d2)}<br>③ 第三關：${t.s3} 步・${mmss(t.d3)}<br>💡 使用提示：${t.h} 次</p>`:""};
+// 排行榜每人下方的小字。後端回傳 null 代表「這項還沒對你公開」（顯示🔒），提示次數要等自己通關第三關才看得到
+const lbSub=r=>{if(!CONFIG.LB_SHOW_STATS||typeof r.s1!=="number"||typeof r.s2!=="number")return"";
+ const num=typeof r.s3==="number"&&typeof r.d3==="number",L3=num?`${r.s3}步・${m_s(r.d3)}`:(r.s3===null?"🔒":"—"),H=typeof r.h==="number"?`${r.h}次`:(r.h===null?"🔒":"—");
+ return`<br><small style="color:#aaa;font-weight:400">①${r.s1}次・${m_s(r.d1)}　②${r.s2}步・${m_s(r.d2)}　③${L3}　💡${H}</small>`};
 // 自己操作的步數：每走一格 +1，但「立刻走回上一格」不算，避免來回晃動灌步數
-function mv(i){if(HB||paused)return;const b=P.ord.indexOf(15);if(move(i)){if(i!==P.pb)P.since=(P.since|0)+1;P.pb=b;chk();save();render()}}
+function mv(i){if(HB||paused)return;const b=P.ord.indexOf(15);if(move(i)){P.m3=(P.m3|0)+1;if(i!==P.pb)P.since=(P.since|0)+1;P.pb=b;chk();save();render()}}
 const needMoves=()=>Math.max(0,CONFIG.HINT_MIN_MOVES-(P.since|0));
 function hint(){if(P.hints>=CONFIG.HINT_MAX_USES||HB||paused||shielded()||needMoves()>0)return;P.hints++;P.since=0;P.pb=-1;P.el+=CONFIG.HINT_PENALTY_SEC;HB=true;let n=0;save();
  hintTimer=setInterval(()=>{const tr=P.trail;const stop=()=>{clearInterval(hintTimer);hintTimer=null;HB=false};
   if(n++>=CONFIG.HINT_AUTO_STEPS||tr.length<2){stop();save();render();return}
-  move(tr[tr.length-2]);chk();if(view==="gate")stop();save();render()},450)}
+  if(move(tr[tr.length-2]))P.m3=(P.m3|0)+1; // 提示自動移動也計入總步數
+  chk();if(view==="gate")stop();save();render()},450)}
 // ---- 通關開門動畫 ----
 function rGate(){const E=["🎃","👻","🦇","🍬","🕯️","✨","💀","🕸️"];let ps="",st="";
  for(let i=0;i<18;i++){const dx=(Math.random()*320-160)|0,dy=-((60+Math.random()*190)|0),dl=(4.6+Math.random()*.8).toFixed(2);ps+=`<span class="gs-p" style="--dx:${dx}px;--dy:${dy}px;animation-delay:${dl}s">${E[i%E.length]}</span>`}
@@ -281,25 +295,60 @@ function rGate(){const E=["🎃","👻","🦇","🍬","🕯️","✨","💀","�
  <div style="text-align:center"><button class="btn gs-next" onclick="finishGate()">領取任務結果 ▶</button></div>
  </div>`}
 function finishGate(){P.gp=0;save();view="done";render()}
-function rDone(){let rk;if(CONFIG.SCORE_URL){rk=CLOUD?CLOUD.findIndex(r=>r.name===ME)+1:0}else rk=REC.slice().sort((a,b)=>a.sec-b.sec).findIndex(r=>r.name===ME&&r.start===P.start)+1;
+function rDone(){const rk=CLOUD?CLOUD.findIndex(r=>r.name===ME)+1:0;
  return`<div class="card"><h2>🎉 任務圓滿達成</h2><p>隨著最後一塊心智碎片歸位，刺耳的警報聲戛然而止。幻象如煙霧般消散，你成功擊退了幽靈駭客與大魔王，拯救了大家的理智與物資，辦公室重新恢復了光明與平靜。任務圓滿達成，最強資安特派員！</p>
- <h3>【本次任務資安紀錄】</h3><p><b>${ME}</b>${stars(P)}</p><p class="mono">🕒 開始時間：${fmt(P.start)}<br>🏁 完成時間：${fmt(P.end)}<br>⏱️ 花費總時間：${mmss(P.el)}</p>${rk?`<p>目前排名：第 ${rk} 名</p>`:""}
- <p>現在請憑通關畫面，前往「${CONFIG.ORG_NAME}」領取屬於你的萬聖節戰利品與獎勵吧！</p><button class="btn alt" onclick="view='gate';render()">🎬 重播開門動畫</button><button class="btn alt" onclick="logout()">登出</button></div>`}
+ <h3>【本次任務資安紀錄】</h3><p><b>${ME}</b>${stars(P)}</p><p class="mono">🕒 開始時間：${fmt(P.start)}<br>🏁 完成時間：${fmt(P.end)}<br>⏱️ 花費總時間：${mmss(P.el)}</p>${statsHtml(P)}${rk?`<p>目前排名：第 ${rk} 名</p>`:""}
+ <p>現在請憑通關畫面，前往「${CONFIG.ORG_NAME}」領取屬於你的萬聖節戰利品與獎勵吧！</p><button class="btn alt" onclick="view='gate';render()">🎬 重播開門動畫</button><button class="btn alt" onclick="logout()">登出</button><button class="btn alt" onclick="copyCard(this)">🖼️ 領取通關畫面</button></div>`}
+// ---- 領取通關畫面：把結算卡片畫成圖片放進剪貼簿（文字直接讀目前畫面上的卡片，改結算頁文字時這裡不用另外改）----
+async function cardPng(){await document.fonts.ready;
+ const card=document.querySelector("#app .card"),W=720,m=14,pad=26,inner=W-2*m-2*pad,F="'Noto Sans TC','Microsoft JhengHei',sans-serif",M="'IBM Plex Mono','Noto Sans TC',monospace";
+ const c=document.createElement("canvas"),x=c.getContext("2d"),blocks=[];
+ const runs=(n,st,o)=>n.childNodes.forEach(k=>{if(k.nodeType===3)o.push({...st,t:k.textContent});else if(k.tagName==="BR")o.push({br:1});else if(k.nodeType===1){const s={...st};if(k.tagName==="B")s.b=1;if(k.classList.contains("gold"))s.c="#ffd700";runs(k,s,o)}});
+ [...card.children].forEach(e=>{if(e.tagName==="BUTTON")return;const h=/^H[23]$/.test(e.tagName),sz=e.tagName==="H2"?30:h?22:17,o=[];
+  runs(e,{c:h?"#ff7a1a":"#f1ead8",b:h?1:0,size:sz,mono:e.classList.contains("mono")},o);blocks.push({o,sz,gap:h?8:14})});
+ const font=r=>`${r.b?700:400} ${r.size}px ${r.mono?M:F}`;
+ const lay=blocks.map(b=>{const lines=[[]];let w=0;
+  b.o.forEach(r=>{if(r.br){lines.push([]);w=0;return}x.font=font(r);
+   for(const ch of Array.from(r.t)){const cw=x.measureText(ch).width,L0=lines[lines.length-1];if(w+cw>inner&&L0.length){lines.push([]);w=0}
+    const L=lines[lines.length-1],p=L[L.length-1];if(p&&p.c===r.c&&p.b===r.b&&p.mono===r.mono&&p.size===r.size)p.t+=ch;else L.push({...r,t:ch});w+=cw}});
+  return{lines,lh:Math.round(b.sz*1.65),gap:b.gap}});
+ const head=86,H=m*2+pad*2+head+lay.reduce((s,b)=>s+b.lines.length*b.lh+b.gap,0),S=2;
+ c.width=W*S;c.height=H*S;x.scale(S,S);
+ x.fillStyle="#0b0e14";x.fillRect(0,0,W,H);
+ x.beginPath();x.roundRect(m,m,W-2*m,H-2*m,16);x.fillStyle="#1c222d";x.fill();x.strokeStyle="#ffffff22";x.lineWidth=1;x.stroke();
+ x.textAlign="center";x.fillStyle="#ff7a1a";x.font=`700 26px ${F}`;x.fillText("👻 捷而思・現在搞什麼鬼？！",W/2,m+pad+30);
+ x.fillStyle="#7dffb2";x.font=`400 16px ${F}`;x.fillText(`萬聖節限定篇・主辦：${CONFIG.ORG_NAME}`,W/2,m+pad+58);
+ x.textAlign="left";let y=m+pad+head;
+ lay.forEach(b=>{b.lines.forEach(L=>{let px=m+pad;L.forEach(s=>{x.font=font(s);x.fillStyle=s.c;x.fillText(s.t,px,y+b.lh*.72);px+=x.measureText(s.t).width});y+=b.lh});y+=b.gap});
+ return new Promise(r=>c.toBlob(r,"image/png"))}
+function saveBlob(b,n){const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=n;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
+// 一按就把通關畫面複製成圖片，可直接貼到聊天視窗；瀏覽器不支援複製圖片時，改成下載圖片檔
+async function copyCard(b){const t0=b.textContent;b.disabled=true;
+ try{if(!navigator.clipboard||!window.ClipboardItem)throw 0;await navigator.clipboard.write([new ClipboardItem({"image/png":cardPng()})]);b.textContent="✅ 已複製，直接貼上即可"}
+ catch(e){try{saveBlob(await cardPng(),`通關畫面_${ME}.png`);b.textContent="⬇️ 已下載圖片"}catch(x){b.textContent="❌ 沒成功，請改用截圖"}}
+ setTimeout(()=>{b.textContent=t0;b.disabled=false},2800)}
 // ---- leaderboard ----
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
 // ---- 雲端排行榜（Google Apps Script）----
-let CLOUD=null,cloudErr="",cloudBusy=false;
-function fetchLB(){if(!CONFIG.SCORE_URL||cloudBusy)return;cloudBusy=true;
- fetch(CONFIG.SCORE_URL+(CONFIG.SCORE_URL.includes("?")?"&":"?")+"t="+Date.now()).then(r=>r.json()).then(j=>{CLOUD=Array.isArray(j)?j:[];cloudErr=""}).catch(()=>{cloudErr="無法連線到雲端排行榜"}).finally(()=>{cloudBusy=false;rLB();if(view==="done")render()})}
-function submitScore(){if(!CONFIG.SCORE_URL||!P||!P.end||P.sent||ADMIN)return;
- const body=JSON.stringify({id:P.name+"|"+P.start,name:P.name,sec:Math.round(P.el),shots:P.shots|0,start:P.start,end:P.end});
- fetch(CONFIG.SCORE_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body}).then(()=>{P.sent=1;save();setTimeout(fetchLB,1500)}).catch(()=>{})}
+let CLOUD=null,cloudErr="",cloudBusy=false,FULL=false;
+// 還沒通關的人拿到「公開版」（提示次數是 null）；通關後送出成績會領到一把通行證(tok)，之後改拿「完整版」
+async function fetchLB(){if(!CONFIG.SCORE_URL||cloudBusy)return;cloudBusy=true;const p=P;let j=null,full=false;
+ try{
+  if(p&&p.end&&p.tok){try{j=await jpost({action:"board",id:p.name+"|"+p.start,tok:p.tok});full=Array.isArray(j)}catch(e){}}
+  if(!full){const r=await fetch(CONFIG.SCORE_URL+(CONFIG.SCORE_URL.includes("?")?"&":"?")+"t="+Date.now());j=await r.json()}
+  if(full&&P!==p){cloudBusy=false;CLOUD=null;FULL=false;rLB();return fetchLB()}   // 等待期間已登出或換人：丟掉完整版
+  CLOUD=Array.isArray(j)?j:[];FULL=full;cloudErr=""}
+ catch(e){cloudErr="無法連線到雲端排行榜"}
+ cloudBusy=false;rLB();if(view==="done")render()}
+let sending=false;
+function submitScore(){if(!CONFIG.SCORE_URL||!P||!P.end||P.tok||ADMIN||sending)return;const p=P;sending=true;
+ jpost(Object.assign({id:p.name+"|"+p.start,name:p.name,sec:Math.round(p.el),shots:p.shots|0,start:p.start,end:p.end},lvlStats(p)))
+  .then(j=>{sending=false;if(j&&j.ok&&j.tok){p.tok=j.tok;p.sent=1;USERS[p.name]=p;sv("hw_users",USERS);fetchLB()}}).catch(()=>{sending=false})}
 if(CONFIG.SCORE_URL){fetchLB();setInterval(()=>{if(!document.hidden)fetchLB()},30000)}
-function rLB(){let L,title;
- if(CONFIG.SCORE_URL){title="🏆 排行榜（全公司）";L=(CLOUD||[]).slice(0,10)}
- else{title="🏆 排行榜（本機）";const best={};REC.forEach(r=>{if(!best[r.name]||r.sec<best[r.name].sec)best[r.name]=r});L=Object.values(best).sort((a,b)=>a.sec-b.sec).slice(0,10)}
- const empty=CONFIG.SCORE_URL&&CLOUD===null?(cloudErr?`<p class="err">${cloudErr}</p>`:"<p>載入中…</p>"):"<p>尚無通關紀錄</p>";
- $("lb").innerHTML=`<div class="card"><h3>${title}${CONFIG.SCORE_URL?' <button class="btn sm alt" onclick="fetchLB()">🔄 更新</button>':""}</h3>${L.length?`<table>${L.map((r,i)=>`<tr class="${["gold","silver","bronze"][i]||""}"><td>${["👑冠軍","🥈亞軍","🥉季軍"][i]||i+1}</td><td>${esc(r.name)}</td><td class="mono">${mmss(r.sec)}</td></tr>`).join("")}</table>`:empty}${cloudErr&&CLOUD?`<p class="err" style="font-size:.8rem">${cloudErr}</p>`:""}</div>`}
+function rLB(){const L=(CLOUD||[]).slice(0,10),
+ empty=CLOUD===null?(cloudErr?`<p class="err">${cloudErr}</p>`:"<p>載入中…</p>"):"<p>尚無通關紀錄</p>",
+ lockNote=CONFIG.LB_SHOW_STATS&&L.length&&!FULL?'<p style="font-size:.8rem;color:#aaa;margin:8px 0 0"></p>':"";
+ $("lb").innerHTML=`<div class="card"><h3>🏆 排行榜（全公司） <button class="btn sm alt" onclick="fetchLB()">🔄 更新</button></h3>${L.length?`<table>${L.map((r,i)=>`<tr class="${["gold","silver","bronze"][i]||""}"><td>${["👑冠軍","🥈亞軍","🥉季軍"][i]||i+1}</td><td>${esc(r.name)}${lbSub(r)}</td><td class="mono">${mmss(r.sec)}</td></tr>`).join("")}</table>`:empty}${lockNote}${cloudErr&&CLOUD?`<p class="err" style="font-size:.8rem">${cloudErr}</p>`:""}</div>`}
 // ---- admin ----
 function rAdm(){const a=$("adm");if(!ADMIN){a.innerHTML="";return}
  const names=Object.keys(USERS);
@@ -308,13 +357,13 @@ function rAdm(){const a=$("adm");if(!ADMIN){a.innerHTML="";return}
  <input id="tn" placeholder="測試帳號名稱"><button class="btn sm" onclick="addT()">建立並進入</button>
  <div style="overflow-x:auto"><table><tr><th>帳號</th><th>關卡</th><th>耗時</th><th>操作</th></tr>${names.map(n=>{const u=USERS[n];return`<tr><td>${n}${stars(u)}</td><td>${u.end?"完成":u.start?"第"+(u.lvl+1)+"關":"未開始"}</td><td class="mono">${mmss(u.el)}</td><td>
  <button class="btn sm" onclick="asUser('${n}')">進入</button><button class="btn sm alt" onclick="skip('${n}')">跳關</button><button class="btn sm alt" onclick="rst('${n}')">重設</button><button class="btn sm red" onclick="del('${n}')">刪除</button></td></tr>`}).join("")}</table></div>
- <button class="btn red sm" onclick="delAll()">清除全部試玩紀錄與排行榜</button></div>`}
-function addT(){const n=$("tn").value.trim();if(!n)return;const was=ADMIN;enter(n);ADMIN=was;rAdm()}
-function asUser(n){const was=ADMIN;enter(n);ADMIN=was;rAdm()}
-function skip(n){const u=USERS[n];if(!u)return;if(!u.start)u.start=Date.now();if(u.lvl<2)u.lvl++;else if(!u.end){u.end=Date.now();REC.push({name:n,start:u.start,end:u.end,sec:Math.round(u.el)})}
- sv("hw_users",USERS);sv("hw_rec",REC);if(ME===n){resetRun();P=u;view=u.end?"done":"puzzle";startTick()}render()}
-function rst(n){USERS[n]=newProgress(n);REC=REC.filter(r=>r.name!==n);sv("hw_users",USERS);sv("hw_rec",REC);if(ME===n){resetRun();P=USERS[n];view="brief"}render()}
-function del(n){delete USERS[n];REC=REC.filter(r=>r.name!==n);sv("hw_users",USERS);sv("hw_rec",REC);if(ME===n){resetRun();P=null;ME=null;view="login";chips=[]}render()}
-function delAll(){if(!confirm("確定清除所有本機紀錄？"))return;USERS={};REC=[];sv("hw_users",USERS);sv("hw_rec",REC);P=null;ME=null;ADMIN=false;view="login";chips=[];render()}
+ <button class="btn red sm" onclick="delAll()">清除全部本機試玩紀錄</button></div>`}
+const asUser=n=>{const w=ADMIN;enter(n);ADMIN=w;rAdm()};
+function addT(){const n=$("tn").value.trim();if(n)asUser(n)}
+function skip(n){const u=USERS[n];if(!u)return;if(!u.start)u.start=Date.now();if(u.lvl<2)u.lvl++;else if(!u.end)u.end=Date.now();
+ svU();if(ME===n){resetRun();P=u;view=u.end?"done":"puzzle";startTick()}render()}
+function rst(n){USERS[n]=newProgress(n);svU();if(ME===n){resetRun();P=USERS[n];view="brief"}render()}
+function del(n){delete USERS[n];svU();if(ME===n){resetRun();P=null;ME=null;view="login";chips=[]}render()}
+function delAll(){if(!confirm("確定清除所有本機紀錄？"))return;USERS={};svU();P=null;ME=null;ADMIN=false;view="login";chips=[];render()}
 render();
 </script></body></html>
